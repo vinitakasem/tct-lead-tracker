@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCT — Corporate Lead Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--coral:#C8443A;--coral-light:#F5E8E7;--cream:#FDF8F3;--charcoal:#2C2C2C;--mid:#6B6B6B;--border:#E8E0D8;--white:#FFF;--green:#3A8C5C;--green-light:#E8F5EE;--amber:#C87A1A;--amber-light:#FDF3E3;--blue:#2A6EBB;--blue-light:#E8F0FA;--purple:#7B4FA0;--purple-light:#F3EBF8;--grey:#9B9B9B;--grey-light:#F5F5F5;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:var(--cream);color:var(--charcoal);font-size:13px;}
+.header{background:var(--coral);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.header h1{color:#fff;font-size:17px;font-weight:700;}
+.header .sub{color:rgba(255,255,255,0.8);font-size:11px;margin-top:2px;}
+.save-status{color:rgba(255,255,255,0.75);font-size:11px;font-style:italic;text-align:right;}
+.tabs{background:#fff;border-bottom:2px solid var(--border);display:flex;padding:0 24px;gap:4px;}
+.tab{padding:11px 18px;cursor:pointer;font-size:12px;font-weight:600;color:var(--mid);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:var(--coral);}.tab.active{color:var(--coral);border-bottom-color:var(--coral);}
+.main{padding:18px 24px;max-width:1500px;}
+.stats-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px;}
+.stat-card{background:#fff;border-radius:10px;padding:10px 12px;border:1px solid var(--border);}
+.stat-card .num{font-size:20px;font-weight:700;}.stat-card .lbl{font-size:10px;color:var(--mid);margin-top:1px;}
+.stat-card.total .num{color:var(--coral);}.stat-card.s1 .num{color:var(--blue);}
+.stat-card.s2 .num{color:var(--amber);}.stat-card.s3 .num{color:var(--purple);}
+.stat-card.s4 .num{color:var(--green);}.stat-card.estab .num{color:#8B4513;}
+.stat-card.incomplete .num{color:#E74C3C;}
+.pipeline-header{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;flex-wrap:wrap;}
+.stage-pill{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:2px solid transparent;white-space:nowrap;transition:all .15s;}
+.stage-pill:hover{transform:translateY(-1px);}
+.stage-pill.all{background:var(--charcoal);color:#fff;}
+.stage-pill.s0{background:var(--grey-light);color:var(--grey);}
+.stage-pill.s1{background:var(--blue-light);color:var(--blue);}
+.stage-pill.s2{background:var(--amber-light);color:var(--amber);}
+.stage-pill.s3{background:var(--purple-light);color:var(--purple);}
+.stage-pill.s4{background:var(--green-light);color:var(--green);}
+.stage-pill.s5{background:#FDE8E8;color:#C0392B;}
+.stage-pill.active{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
+.toolbar input,.toolbar select{padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;background:#fff;color:var(--charcoal);outline:none;}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--coral);}
+.toolbar input[type=text]{flex:1;min-width:180px;}
+.btn{padding:7px 14px;border-radius:8px;border:none;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--coral);color:#fff;}.btn-primary:hover{background:#B03930;}
+.btn-outline{background:#fff;color:var(--coral);border:1.5px solid var(--coral);}.btn-outline:hover{background:var(--coral-light);}
+.btn-sm{padding:4px 9px;font-size:11px;border-radius:6px;}
+.btn-warn{background:#FDECEA;color:#C0392B;border:none;}
+.btn-green{background:var(--green);color:#fff;}.btn-green:hover{background:#2d7048;}
+.table-wrap{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:#FAF5F0;padding:9px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr{border-bottom:1px solid #F5F0EB;transition:background .1s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}tbody tr:hover{background:#FBF7F3;}
+td{padding:9px 10px;font-size:12px;vertical-align:middle;}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap;}
+.badge-s0{background:var(--grey-light);color:var(--grey);}
+.badge-s1{background:var(--blue-light);color:var(--blue);}
+.badge-s2{background:var(--amber-light);color:var(--amber);}
+.badge-s3{background:var(--purple-light);color:var(--purple);}
+.badge-s4{background:var(--green-light);color:var(--green);}
+.badge-s5{background:#FDECEA;color:#C0392B;}
+.type-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;background:var(--coral-light);color:var(--coral);}
+.size-badge-estab{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#FFF3E0;color:#8B4513;}
+.size-badge-small{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;background:var(--grey-light);color:var(--grey);}
+.incomplete-flag{color:#E74C3C;font-size:10px;font-weight:700;}
+.priority-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+.p-high{background:#E74C3C;}.p-med{background:#F39C12;}.p-low{background:#27AE60;}
+.followup-due{color:#C0392B;font-weight:600;}.followup-ok{color:var(--green);}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:14px;width:680px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:2;}
+.modal-header h2{font-size:14px;font-weight:700;}
+.modal-body{padding:18px 20px;}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:#fff;}
+.close-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--mid);line-height:1;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-group.full{grid-column:1/-1;}
+.form-group label{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.4px;}
+.form-group input,.form-group select,.form-group textarea{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--charcoal);outline:none;transition:border-color .15s;background:#fff;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--coral);}
+.form-group textarea{resize:vertical;min-height:65px;}
+.section-divider{grid-column:1/-1;margin:2px 0;padding-top:8px;border-top:1px solid var(--border);font-size:11px;font-weight:700;color:var(--coral);text-transform:uppercase;letter-spacing:.5px;}
+.warn-banner{grid-column:1/-1;background:#FDECEA;border:1px solid #F5C6C2;border-radius:8px;padding:8px 12px;font-size:11px;color:#C0392B;font-weight:600;}
+/* SCRIPTS */
+.script-section{background:#fff;border-radius:12px;border:1px solid var(--border);margin-bottom:14px;overflow:hidden;}
+.script-header{padding:12px 16px;background:#FAF5F0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.script-header-left{flex:1;}
+.script-header h3{font-size:13px;font-weight:700;}
+.script-tag{font-size:10px;color:var(--mid);margin-top:2px;}
+.script-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.script-body{padding:14px 16px;display:none;}
+.script-body.open{display:block;}
+.script-sub-label{font-size:11px;font-weight:600;color:var(--mid);margin-bottom:6px;margin-top:10px;}
+.script-sub-label:first-child{margin-top:0;}
+.script-view{background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;line-height:1.75;white-space:pre-wrap;font-family:'Poppins',sans-serif;margin-bottom:8px;min-height:60px;}
+.script-edit{display:none;width:100%;padding:10px;border:1.5px solid var(--coral);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;line-height:1.75;resize:vertical;min-height:100px;outline:none;margin-bottom:8px;}
+.script-actions{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+.copy-btn{background:var(--coral);color:#fff;border:none;padding:5px 13px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;}
+.copy-btn:hover{background:#B03930;}
+.edit-script-btn{background:#fff;color:var(--coral);border:1.5px solid var(--coral);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;}
+.save-script-btn{background:var(--green);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;display:none;}
+.cancel-script-btn{background:#fff;color:var(--mid);border:1.5px solid var(--border);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;display:none;}
+.copy-ok{color:var(--green);font-size:11px;display:none;}
+.tier-label{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-right:4px;}
+.tier-a{background:#FFF3E0;color:#8B4513;}.tier-b{background:var(--grey-light);color:var(--mid);}
+/* SOP */
+.sop-list{list-style:none;}
+.sop-card{background:#fff;border-radius:12px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden;transition:box-shadow .15s;}
+.sop-card.dragging{opacity:.5;box-shadow:0 8px 25px rgba(0,0,0,.15);}
+.sop-card.drag-over{border-color:var(--coral);box-shadow:0 0 0 2px var(--coral-light);}
+.sop-card-header{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.drag-handle{cursor:grab;color:var(--grey);font-size:16px;padding:2px 6px;border-radius:4px;user-select:none;flex-shrink:0;}
+.drag-handle:hover{background:var(--grey-light);}
+.drag-handle:active{cursor:grabbing;}
+.stage-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.sop-card-body{padding:12px 16px;}
+.sop-steps{list-style:none;}
+.sop-steps li{padding:6px 0;border-bottom:1px solid #F5F0EB;font-size:12px;display:flex;gap:8px;}
+.sop-steps li:last-child{border-bottom:none;}
+.sop-steps li::before{content:"→";color:var(--coral);font-weight:700;flex-shrink:0;}
+.tool-tag{display:inline-block;background:var(--coral-light);color:var(--coral);padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-left:4px;}
+.bow-tag{display:inline-block;background:#E8F0FF;color:#2A5BB5;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-left:4px;}
+.sop-edit-area{display:none;width:100%;padding:10px;border:1.5px solid var(--coral);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;resize:vertical;min-height:120px;outline:none;margin-top:8px;line-height:1.7;}
+.sop-edit-actions{display:none;gap:8px;margin-top:8px;}
+.sop-saving{font-size:11px;color:var(--green);margin-left:8px;display:none;}
+.sop-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.sop-toolbar h3{font-size:13px;font-weight:700;color:var(--mid);}
+/* DETAIL */
+.detail-section{margin-bottom:14px;}
+.detail-section h4{font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.detail-row{display:flex;gap:6px;font-size:12px;padding:3px 0;}
+.detail-row .key{color:var(--mid);width:130px;flex-shrink:0;}
+.empty{text-align:center;padding:40px 20px;color:var(--mid);}
+.empty .icon{font-size:36px;margin-bottom:8px;}
+@media(max-width:768px){.stats-row{grid-template-columns:repeat(3,1fr);}.form-grid{grid-template-columns:1fr;}table{font-size:11px;}td,th{padding:7px 7px;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>🎂 TCT — Corporate Lead Tracker</h1><div class="sub">The Catering Table · ระบบติดตามลูกค้าองค์กร</div></div>
+  <div class="save-status" id="saveStatus">กำลังโหลด...</div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="showTab('leads')">📋 Leads</div>
+  <div class="tab" onclick="showTab('scripts')">💬 Scripts</div>
+  <div class="tab" onclick="showTab('sop')">📖 SOP</div>
+</div>
+
+<!-- LEADS TAB -->
+<div id="tab-leads" class="main">
+  <div class="stats-row" id="statsRow"></div>
+  <div class="pipeline-header" id="pipelineHeader"></div>
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="🔍 ค้นหาชื่อแบรนด์, ผู้ติดต่อ..." oninput="renderTable()">
+    <select id="filterType" onchange="renderTable()">
+      <option value="">ทุกประเภท</option>
+      <option>Hotel / Hospitality</option><option>Real Estate / Property</option>
+      <option>Finance / Banking</option><option>Healthcare / Clinic</option>
+      <option>Tech Company</option><option>Retail / Brand</option>
+      <option>Law Firm / Consulting</option><option>Other</option>
+    </select>
+    <select id="filterSize" onchange="renderTable()">
+      <option value="">ทุก Brand Size</option>
+      <option>Established Brand</option><option>Small / Local Brand</option>
+    </select>
+    <select id="filterPriority" onchange="renderTable()">
+      <option value="">ทุก Priority</option><option>High</option><option>Medium</option><option>Low</option>
+    </select>
+    <select id="filterIncomplete" onchange="renderTable()">
+      <option value="">ทั้งหมด</option>
+      <option value="1">⚠️ ไม่มีผู้ติดต่อ</option>
+    </select>
+    <button class="btn btn-primary" onclick="openModal()">+ เพิ่ม Lead</button>
+    <button class="btn btn-outline" onclick="exportCSV()">⬇ CSV</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>แบรนด์</th><th>Size</th><th>ประเภท</th>
+        <th>ผู้ติดต่อ</th><th>ช่องทาง / Contact</th><th>Stage</th>
+        <th>Priority</th><th>Follow Up</th><th>Note</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="leadsBody"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none"><div class="icon">📭</div><p>ไม่มี Lead ในหมวดนี้</p></div>
+  </div>
+</div>
+
+<!-- SCRIPTS TAB -->
+<div id="tab-scripts" class="main" style="display:none">
+  <p style="font-size:12px;color:var(--mid);margin-bottom:14px;">
+    <span class="tier-label tier-a">Established Brand</span> = Formal, email, marketing dept &nbsp;·&nbsp;
+    <span class="tier-label tier-b">Small / Local Brand</span> = Casual, Line OA, owner/admin
+  </p>
+  <div id="scriptsContainer"></div>
+</div>
+
+<!-- SOP TAB -->
+<div id="tab-sop" class="main" style="display:none">
+  <div class="sop-toolbar">
+    <p style="font-size:12px;color:var(--mid)">ขั้นตอนการทำงานแต่ละ Stage — ลาก ⠿ เพื่อเรียงลำดับใหม่</p>
+    <span id="sopSaveStatus" style="font-size:11px;color:var(--green);display:none">✓ บันทึกแล้ว</span>
+  </div>
+  <ul class="sop-list" id="sopList"></ul>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="modalTitle">เพิ่ม Lead ใหม่</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div id="incompleteBanner" class="warn-banner" style="display:none">⚠️ ยังไม่มีชื่อผู้ติดต่อ — กรอกชื่อก่อนส่ง Script Step 2</div>
+        <div class="section-divider">ข้อมูลแบรนด์</div>
+        <div class="form-group full"><label>ชื่อแบรนด์ / บริษัท *</label><input type="text" id="f-company" placeholder="ชื่อแบรนด์"></div>
+        <div class="form-group"><label>ประเภทธุรกิจ</label>
+          <select id="f-type"><option value="">เลือก</option><option>Hotel / Hospitality</option><option>Real Estate / Property</option><option>Finance / Banking</option><option>Healthcare / Clinic</option><option>Tech Company</option><option>Retail / Brand</option><option>Law Firm / Consulting</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Brand Size</label>
+          <select id="f-brandSize"><option value="Small / Local Brand">Small / Local Brand</option><option value="Established Brand">Established Brand</option></select>
+        </div>
+        <div class="form-group"><label>Website</label><input type="text" id="f-website" placeholder="https://"></div>
+        <div class="form-group"><label>Priority</label>
+          <select id="f-priority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select>
+        </div>
+        <div class="section-divider">ผู้ติดต่อ</div>
+        <div class="form-group"><label>ชื่อผู้ติดต่อ</label><input type="text" id="f-contact" placeholder="ชื่อ-นามสกุล" oninput="checkIncomplete()"></div>
+        <div class="form-group"><label>ตำแหน่ง</label><input type="text" id="f-position" placeholder="Marketing Manager, PA..."></div>
+        <div class="form-group full"><label>ช่องทางหลัก</label>
+          <select id="f-channel"><option>Line OA</option><option>Email</option><option>Email + Line OA</option><option>Line OA + Email</option><option>โทรศัพท์</option></select>
+        </div>
+        <div class="form-group full"><label>Email</label><input type="text" id="f-email" placeholder="marketing@brand.com"></div>
+        <div class="form-group"><label>Line ID / Line OA</label><input type="text" id="f-lineId" placeholder="@brandname"></div>
+        <div class="form-group"><label>เบอร์โทรศัพท์</label><input type="text" id="f-tel" placeholder="08XXXXXXXX"></div>
+        <div class="section-divider">Pipeline</div>
+        <div class="form-group"><label>Stage</label>
+          <select id="f-stage"><option value="0">0 — New Lead</option><option value="1">1 — Contacted</option><option value="2">2 — Interested</option><option value="3">3 — Proposal Sent</option><option value="4">4 — Closed Won ✅</option><option value="5">5 — Not Interested</option></select>
+        </div>
+        <div class="form-group"><label>Source</label>
+          <select id="f-source"><option value="Brand Collab List">Brand Collab List</option><option value="แนะนำจากคนรู้จัก">แนะนำจากคนรู้จัก</option><option value="ค้นหาเอง">ค้นหาเอง</option><option value="Social Media">Social Media</option><option value="Walk-in / Event">Walk-in / Event</option><option value="Inbound">Inbound</option><option value="อื่นๆ">อื่นๆ</option></select>
+        </div>
+        <div class="form-group"><label>วันที่ติดต่อครั้งแรก</label><input type="date" id="f-firstContact"></div>
+        <div class="form-group"><label>Last Interaction</label><input type="date" id="f-lastInteraction"></div>
+        <div class="form-group"><label>Follow Up ครั้งถัดไป</label><input type="date" id="f-followup"></div>
+        <div class="form-group"><label>มูลค่า Proposal (฿)</label><input type="number" id="f-value" placeholder="0"></div>
+        <div class="form-group full"><label>Notes</label><textarea id="f-note" placeholder="บันทึกผลการคุย, ความต้องการ..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" id="saveLeadBtn" onclick="saveLead()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailOverlay">
+  <div class="modal">
+    <div class="modal-header"><h2 id="detailTitle">รายละเอียด</h2><button class="close-btn" onclick="closeDetail()">×</button></div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeDetail()">ปิด</button>
+      <button class="btn btn-primary" id="editFromDetailBtn">✏️ แก้ไข</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tct_leads_v8';
+const SCRIPTS_KEY = 'tct_scripts_v1';
+const SOP_KEY = 'tct_sop_v1';
+const SEED_LEADS = [{"id": "imp_0", "company": "Gingorn Koitiew", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "เคยส่งสินค้า: DURIAN | IG: @gingorn.koitiew", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@gingornkoitiew", "tel": ""}, {"id": "imp_1", "company": "Earng Patha", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @earngpatha", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@earngpatha", "tel": ""}, {"id": "imp_2", "company": "Fernnpc", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @fernnpc", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@fernnpcwork", "tel": ""}, {"id": "imp_3", "company": "Aitichaa", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@aidesign", "tel": ""}, {"id": "imp_4", "company": "Kaimuk N", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@kaimukn", "tel": ""}, {"id": "imp_5", "company": "Bellephat", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@bellephat.work", "tel": ""}, {"id": "imp_6", "company": "Mamaploykoh", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@814vsvad", "tel": ""}, {"id": "imp_7", "company": "Mommyof Velaa", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@velaawork", "tel": ""}, {"id": "imp_8", "company": "Mommy Boo", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@305xmrrn", "tel": ""}, {"id": "imp_9", "company": "Saifah Nubdao", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@saiifahnubdao", "tel": ""}, {"id": "imp_10", "company": "Sestraroom", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@sestraroom", "tel": ""}, {"id": "imp_11", "company": "Pchnd Kk", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@pchnd.kk", "tel": ""}, {"id": "imp_12", "company": "Myhomyhom", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@948zouqe", "tel": ""}, {"id": "imp_13", "company": "Jailamer", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@jailamer", "tel": ""}, {"id": "imp_14", "company": "Mypaintingg", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@dhf0320u", "tel": ""}, {"id": "imp_15", "company": "Littlebaby Pj", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@514xihgf", "tel": ""}, {"id": "imp_16", "company": "Noelandthefamily", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "nnnoeyd.ap@gmail.com", "lineId": "", "tel": ""}, {"id": "imp_17", "company": "Praewsu Ph", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @praewsu", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@kolsver", "tel": ""}, {"id": "imp_18", "company": "Tzzfe", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @tzzfe", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@kolsver", "tel": ""}, {"id": "imp_19", "company": "Chilihung", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @chilihung", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@ploychidjun", "tel": ""}, {"id": "imp_20", "company": "An An Oun Oun", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @an.an.oun.oun", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@anan.forworkonly", "tel": ""}, {"id": "imp_21", "company": "Bamboo S \\", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @bamboo.s", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@bamboo.s", "tel": ""}, {"id": "imp_22", "company": "Jammamyy", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @jammamyy", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@519myqob", "tel": ""}, {"id": "imp_23", "company": "Hej Bonnie", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @hej", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Hej.bonnie@gmail.com", "lineId": "@hejbonnie", "tel": ""}, {"id": "imp_24", "company": "Gentlewoman", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.Thawanun", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @gentlewomanstore", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "gw@gentlewomanonline.com", "lineId": "@gentlewomanonline", "tel": ""}, {"id": "imp_25", "company": "Cintage", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @cintageshop", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@cintageshop", "tel": ""}, {"id": "imp_26", "company": "Love Potion", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @lovepotion.official", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/@669tdpqt", "tel": ""}, {"id": "imp_27", "company": "4U2 Cosmetics", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @4u2cosmetics", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@4u2co.com", "lineId": "https://lin.ee/m7n5JEv", "tel": ""}, {"id": "imp_28", "company": "Cute Press", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @cute", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing.catergory@ssup.co.th", "lineId": "https://lin.ee/sySmQo0", "tel": "0264260609"}, {"id": "imp_29", "company": "Cha Tra Mue", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @chatramue", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@cha-thai.com", "lineId": "https://lin.ee/sySmQo0", "tel": ""}, {"id": "imp_30", "company": "Bonnana House", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @bonnana.house", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "bonnana.house@gmail.com", "lineId": "https://lin.ee/ZDUTQSz", "tel": ""}, {"id": "imp_31", "company": "Ce Halo", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @ce", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/@540pvfme", "tel": ""}, {"id": "imp_32", "company": "Oh Kajhu", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketingteam@okj.onmicrosoft.com", "lineId": "https://lin.ee/0KNHPbq", "tel": ""}, {"id": "imp_33", "company": "Jones Salad", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @jonessalad", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@jonessalad.com", "lineId": "https://lin.ee/CLXtDAY", "tel": ""}, {"id": "imp_34", "company": "Veganerie", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @veganerie", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "mkt@veganerie.co.th", "lineId": "https://line.me/R/ti/p/@183mqxdq", "tel": ""}, {"id": "imp_35", "company": "Plantiful BKK", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @plantiful.bkk", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@plantiful.bkk", "tel": ""}, {"id": "imp_36", "company": "Kappa BKK", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @kappa.bkk", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/%40bbg3155d", "tel": ""}, {"id": "imp_37", "company": "A Treasure Box", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @atreasurebox", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "contact@atreasureboxofficial.com", "lineId": "https://lin.ee/hOuF3mJ", "tel": ""}, {"id": "imp_38", "company": "Little White Store", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @littlewhitestore", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@littlewhitestore", "tel": ""}, {"id": "imp_39", "company": "Kindly Reminder", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @kindlyreminder.kr", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/4KutR2z", "tel": ""}, {"id": "imp_40", "company": "Merge Official\\", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @merge.official", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/tv8Uxi6", "tel": ""}, {"id": "imp_41", "company": "Garmenti \\", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @garmenti.", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@garmentiandco.com", "lineId": "https://lin.ee/3fgWbWv", "tel": ""}, {"id": "imp_42", "company": "Aristotle Bag", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @aristotlebag", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Aristotlebkk@gmail.com", "lineId": "@aristotlebag", "tel": ""}, {"id": "imp_43", "company": "Mitr", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @mitr", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/e4LCIJy", "tel": ""}, {"id": "imp_44", "company": "Perota Brand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @perota", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/IMscBHh", "tel": ""}, {"id": "imp_45", "company": "Polarboll", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @polarboll", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/VggWcW3", "tel": ""}, {"id": "imp_46", "company": "Two Twice", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @twotwice", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Twotwice.inquiry@gmail.com", "lineId": "https://lin.ee/XZjUlKd", "tel": ""}, {"id": "imp_47", "company": "New Cute", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @newcute.official", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "newcuteshop@gmail.com", "lineId": "@newcuteshopp", "tel": ""}, {"id": "imp_48", "company": "Stylist Shop", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @stylist", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/CdLOYaY", "tel": ""}, {"id": "imp_49", "company": "What We Wear", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @whatwewearrr", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/@zrn2210r", "tel": ""}, {"id": "imp_50", "company": "Malimays", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @malimays.official", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@malimays.admin", "tel": ""}, {"id": "imp_51", "company": "Flat 2112", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @flat2112", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "piyathida.han@flat2112.com", "lineId": "@flat2112", "tel": ""}, {"id": "imp_52", "company": "Lookbook", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @lookbooklookbook", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@lookbooklookbook.com", "lineId": "@lookbooklookbook", "tel": ""}, {"id": "imp_53", "company": "L'Oréal Paris", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "chanpen.manutsongtham@groupm.com", "lineId": "https://lin.ee/y3ez8bo", "tel": "026843288"}, {"id": "imp_54", "company": "Ingu Skin", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @inguskin", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "nathatai@inguskin.com", "lineId": "https://lin.ee/5ApCYGH", "tel": ""}, {"id": "imp_55", "company": "Srichand 1948", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @srichand1948", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@srichand.co.th", "lineId": "https://lin.ee/zVmOzNP", "tel": ""}, {"id": "imp_56", "company": "Mizumi Official", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @mizumi", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@mizuhada.com", "lineId": "https://lin.ee/Ykw7xDV", "tel": ""}, {"id": "imp_57", "company": "Laglace Official", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @laglace", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/@gjw8117r", "tel": ""}, {"id": "imp_58", "company": "Mille Beaute", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @mille", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservice.mille@gmail.com", "lineId": "https://lin.ee/HXXnLmB", "tel": ""}, {"id": "imp_59", "company": "Cathy Doll", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @cathydollclub", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/yUMhjGm", "tel": ""}, {"id": "imp_60", "company": "Twenty Wendy", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @twentywendy", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "piyanuch.twentywendy@gmail.com", "lineId": "https://lin.ee/3Vxky2C", "tel": ""}, {"id": "imp_61", "company": "Meilinda Fanpage", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @meilinda", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "sireethorn.s@meilinda.co.th", "lineId": "@meilindacosmetics", "tel": ""}, {"id": "imp_62", "company": "Nongchat", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @nongchat", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Nakran27@gmail.com", "lineId": "@nongchatwork", "tel": ""}, {"id": "imp_63", "company": "Etudethailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.jitsopin", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @etudethailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "etudehousechannel@gmail.com", "lineId": "https://lin.ee/IIlV3wH", "tel": ""}, {"id": "imp_64", "company": "Babylovett", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @babylovett", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "asawaroj@gmail.com", "lineId": "https://lin.ee/BGmPUqs", "tel": ""}, {"id": "imp_65", "company": "Endless Holiday", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @endless.holiday", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/plNL0N0", "tel": ""}, {"id": "imp_66", "company": "Jovina Cosmetics", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @jovina.cosmetics", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "pattanan.b@jovinagroup.com", "lineId": "https://lin.ee/WJuHV2L", "tel": ""}, {"id": "imp_67", "company": "Clearnose", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @clearnose", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@clearnose.co.th", "lineId": "@clearnose", "tel": ""}, {"id": "imp_68", "company": "Dentiste", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "natcharee.t@smooth-e.com", "lineId": "@dentiste", "tel": "0854890549"}, {"id": "imp_69", "company": "Smooth E Thailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "contact@smooth-e.com", "lineId": "@smoothe", "tel": ""}, {"id": "imp_70", "company": "Drpongskincare Official", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @drpongskincare", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "contact.mkt@drpongofficial.com", "lineId": "@drpongskincare", "tel": ""}, {"id": "imp_71", "company": "Foreo Th", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @foreo", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "tadpicha.klibpeng@foreo.com", "lineId": "@foreo", "tel": "0629969916"}, {"id": "imp_72", "company": "Marimekkothailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.อ๋อ", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @marimekkothailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/CwIHpxu", "tel": ""}, {"id": "imp_73", "company": "Laneigethailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @laneigethailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "ruangvajari.k@th.amorepacific.com", "lineId": "https://lin.ee/aonhw9g", "tel": ""}, {"id": "imp_74", "company": "Larocheposaythailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "corporate.th@loreal.com", "lineId": "", "tel": "026843000"}, {"id": "imp_75", "company": "Nakizthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @nakizthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Pincee.mkt@nakizthailand.com", "lineId": "https://line.me/ti/p/", "tel": ""}, {"id": "imp_76", "company": "Needly Th", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.โบ", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @needly", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@needly", "tel": ""}, {"id": "imp_77", "company": "Sewathailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @sewathailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@sewathailland.com", "lineId": "@sewathailand", "tel": ""}, {"id": "imp_78", "company": "Charleskeith Th", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @charleskeith", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "", "tel": "023656283"}, {"id": "imp_79", "company": "Birkenstock Thailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @birkenstock", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "piyaphacht@pacifica.co.th", "lineId": "https://lin.ee/0od2h9b", "tel": ""}, {"id": "imp_80", "company": "Esteelauder", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @esteelauderth", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "EsteeLauderc@th.estee.com", "lineId": "@EsteeLauderTH", "tel": "024607100"}, {"id": "imp_81", "company": "Bobbibrownthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @bobbibrownthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@bobbibrown.co.th", "lineId": "https://lin.ee/n1a0xVv", "tel": ""}, {"id": "imp_82", "company": "Cliniquethailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @cliniquethailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@clinique.co.th", "lineId": "https://lin.ee/HmW6c55", "tel": ""}, {"id": "imp_83", "company": "Maccosmeticsthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @maccosmeticsthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@maccosmetics.co.th", "lineId": "https://lin.ee/VKOOETB", "tel": ""}, {"id": "imp_84", "company": "Originsthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @originsthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@origins.co.th", "lineId": "https://lin.ee/vhc9b1p", "tel": ""}, {"id": "imp_85", "company": "Lamerthailandofficial", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @lamerthailandofficial", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@lamer.co.th", "lineId": "", "tel": ""}, {"id": "imp_86", "company": "Bananaboat", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "karit@kiwothai.com", "lineId": "", "tel": ""}, {"id": "imp_87", "company": "Jaspalofficial", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @jaspalofficial", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "arirat@jaspal.co.th", "lineId": "https://lin.ee/8vCes9S", "tel": ""}, {"id": "imp_88", "company": "Jiancha", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @jiancha.official", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "mkt.jiancha@gmail.com", "lineId": "https://lin.ee/PjFPKML", "tel": "0819519561"}, {"id": "imp_89", "company": "Pramy", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@shawpetgroup.com", "lineId": "https://lin.ee/uPUfEPm", "tel": "028924174"}, {"id": "imp_90", "company": "Soganic", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @soganics", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@organicsbuddy.com", "lineId": "@organicsbuddy", "tel": "0806951915"}, {"id": "imp_91", "company": "Pipper", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@equatornature.com", "lineId": "https://lin.ee/MN6BNpq", "tel": "027199650"}, {"id": "imp_92", "company": "Panpuri", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @panpuriofficial", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@panpuri.com", "lineId": "https://lin.ee/5nVUGcw", "tel": "022535858"}, {"id": "imp_93", "company": "Karmakamet", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @karmakamet", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing.mgr@karmakamet.co.th", "lineId": "https://lin.ee/Bdm53ZB", "tel": ""}, {"id": "imp_94", "company": "Ivyandpollen", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "K.มิ้นท์", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @ivyandpollen", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/5cmaQcz", "tel": "0977189999"}, {"id": "imp_95", "company": "Kirei Kirei", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "chaiyakorn@lion.co.th", "lineId": "https://lin.ee/OZh3EZ6", "tel": ""}, {"id": "imp_96", "company": "Paul Smith", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "manutsawee.lu@cmg.co.th", "lineId": "https://lin.ee/AOmyYVE", "tel": ""}, {"id": "imp_97", "company": "Diamondgrains", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @diamondgrains", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing.dmg01@gmail.com", "lineId": "https://lin.ee/hTddrjP", "tel": ""}, {"id": "imp_98", "company": "Jellybunny Official", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @jellybunny", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/daPIUVN", "tel": ""}, {"id": "imp_99", "company": "Lynaroundworld&#13;", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @lynaroundworld", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/0puOMJV", "tel": ""}, {"id": "imp_100", "company": "Everyday Thai Tea", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @everyday.thai.tea", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/AiceW8n", "tel": ""}, {"id": "imp_101", "company": "Chongdee Teahouse", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @chongdee.teahouse", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/T7Sccu6", "tel": ""}, {"id": "imp_102", "company": "Knackbag Official", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @knackbag", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/hqmk6wa", "tel": ""}, {"id": "imp_103", "company": "Rallymovement", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @rallymovement", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/CVsZyCm", "tel": ""}, {"id": "imp_104", "company": "Tallulahofficial", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @tallulahofficial", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/jDDMrzh", "tel": ""}, {"id": "imp_105", "company": "Riley Apparels", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @riley.apparels", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/AP9fLFR", "tel": ""}, {"id": "imp_106", "company": "Fabrique Co", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @fabrique.co", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@FABRIQUE.CO", "tel": ""}, {"id": "imp_107", "company": "Loonnystore", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @loonnystore", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@loonnystore", "tel": ""}, {"id": "imp_108", "company": "Galacamille Th", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @galacamille.th", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@galacamille", "tel": ""}, {"id": "imp_109", "company": "ดอยคำ", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@doikham.co.th", "lineId": "https://lin.ee/DT4S0dW", "tel": "026566992"}, {"id": "imp_110", "company": "Kiehl'S", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.จันเพ็ญ", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @kiehlsthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "chanpen.manutsongtham@groupm.com", "lineId": "https://lin.ee/NDZGZaV", "tel": ""}, {"id": "imp_111", "company": "Buzz อาหารแมว", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "marketing@buzzpetsfood.com", "lineId": "", "tel": "0626044487"}, {"id": "imp_112", "company": "Fineline", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@neo-corporate.com", "lineId": "", "tel": "020178900"}, {"id": "imp_113", "company": "Dnee", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@neo-corporate.com", "lineId": "", "tel": "020178900"}, {"id": "imp_114", "company": "Benice", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "customerservices@neo-corporate.com", "lineId": "", "tel": "020178900"}, {"id": "imp_115", "company": "Nestle นมตราหมี", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Goodfood.Nestle@th.nestle.com", "lineId": "", "tel": "026578000"}, {"id": "imp_116", "company": "Kitkatthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Goodfood.Nestle@th.nestle.com", "lineId": "", "tel": "026578000"}, {"id": "imp_117", "company": "Kikomilanoth", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @kikomilanoth", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/%40428esmmh", "tel": ""}, {"id": "imp_118", "company": "Janua Thailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @janua.thailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@janua", "tel": ""}, {"id": "imp_119", "company": "Maybelline Thailand", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/c1aAm2U", "tel": ""}, {"id": "imp_120", "company": "3Cethailand Official", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @3cethailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/1edk4b2", "tel": ""}, {"id": "imp_121", "company": "Gohairoriginal", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @gohairoriginal", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@gohair.co.th", "lineId": "", "tel": ""}, {"id": "imp_122", "company": "Garnierthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @garnierthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "garnierthailand@gmail.com", "lineId": "", "tel": "026843000"}, {"id": "imp_123", "company": "Innisfreethailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @innisfreethailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/57ECOEq", "tel": ""}, {"id": "imp_124", "company": "Judydoll Th", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @judydoll", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "cservice@joy-group.com", "lineId": "", "tel": ""}, {"id": "imp_125", "company": "Casiothailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @casiothailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/RgAhl05", "tel": ""}, {"id": "imp_126", "company": "Three", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @threecosmeticsthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/k6D4lrz", "tel": ""}, {"id": "imp_127", "company": "Clarins", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @clarinsth", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/k6D4lrz", "tel": ""}, {"id": "imp_128", "company": "Rojukissthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "info@rojukiss.com", "lineId": "", "tel": ""}, {"id": "imp_129", "company": "Romand Th", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @romand.th", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "romand.thai@gmail.com", "lineId": "", "tel": ""}, {"id": "imp_130", "company": "Shokubutsu", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/%40194zjmco", "tel": ""}, {"id": "imp_131", "company": "The Body Shop", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @thebodyshopth", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/kiDyroX", "tel": ""}, {"id": "imp_132", "company": "Erb", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @erbthailand", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@erbthailand", "tel": ""}, {"id": "imp_133", "company": "Morningglory Byfour", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @morningglory", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@byfour", "tel": ""}, {"id": "imp_134", "company": "Love Me Flowers", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @love.me.flowers", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/A4iqXmJ", "tel": ""}, {"id": "imp_135", "company": "Coach Thailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "support@thailand-coach.com", "lineId": "", "tel": ""}, {"id": "imp_136", "company": "Clear", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Consumer-Hotline.Thailand@unilever.com", "lineId": "", "tel": "025542000"}, {"id": "imp_137", "company": "Dove", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "hairtherapythailand@gmail.com", "lineId": "", "tel": ""}, {"id": "imp_138", "company": "Lux", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Consumer-Hotline.Thailand@unilever.com", "lineId": "", "tel": ""}, {"id": "imp_139", "company": "Pondsthailand", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "Consumer-Hotline.Thailand@unilever.com", "lineId": "", "tel": ""}, {"id": "imp_140", "company": "Lancome", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.จันเพ็ญ", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "chanpen.manutsongtham@groupm.com", "lineId": "https://lin.ee/wvBJHAv", "tel": ""}, {"id": "imp_141", "company": "Shu Uemura", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.จันเพ็ญ", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "chanpen.manutsongtham@groupm.com", "lineId": "https://lin.ee/uCp5fmV", "tel": ""}, {"id": "imp_142", "company": "Maybelline Thailand", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "K.จันเพ็ญ", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "chanpen.manutsongtham@groupm.com", "lineId": "https://lin.ee/y3ez8bo", "tel": ""}, {"id": "imp_143", "company": "Grainey", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "graineysnack@gmail.com", "lineId": "https://lin.ee/jHPb783", "tel": "0956269586"}, {"id": "imp_144", "company": "Bergamot Club", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "High", "contact": "K'FAI", "position": "Marketing / Admin", "channel": "Email + Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⭐ Bow knows personally | IG: @bergamot", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "b.sirikarn@odinric.com", "lineId": "@BERGAMOTCLUB", "tel": ""}, {"id": "imp_145", "company": "Urban Trooper", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "High", "contact": "K.เบน", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⭐ Bow knows personally | IG: @urban.trooper", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/RnEPrBR", "tel": "0656649955"}, {"id": "imp_146", "company": "Wander Global", "brandSize": "Established Brand", "type": "Retail / Brand", "priority": "High", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⭐ Bow knows personally | IG: @wanderglobalofficial", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@wanderglobal", "tel": ""}, {"id": "imp_147", "company": "Sushi Sora BKK", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "High", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "เคยสั่งสินค้ากับ TCT มาก่อน | IG: @sushi.sora.bkk", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@sushi.sora.bkk", "tel": ""}, {"id": "imp_148", "company": "Kokoro Omakase", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @kokoro", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://line.me/R/ti/p/@028dfzmk", "tel": ""}, {"id": "imp_149", "company": "Ichizu Bangkok", "brandSize": "Small / Local Brand", "type": "Retail / Brand", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @ichizubangkok", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@sushiichizu", "tel": ""}, {"id": "imp_150", "company": "Her Name Is Nala", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "IG: @hernameisnala", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "https://lin.ee/XrqrEWb", "tel": ""}, {"id": "imp_151", "company": "Dodamdodam Studio", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name | IG: @dodamdodam", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@dodamdodam", "tel": ""}, {"id": "imp_152", "company": "Igloogel Official", "brandSize": "Small / Local Brand", "type": "Other", "priority": "Medium", "contact": "", "position": "Marketing / Admin", "channel": "Line OA", "stage": "1", "source": "Brand Collab List (Sheet 2)", "firstContact": "2025-01-01", "lastInteraction": "2025-06-25", "website": "", "followup": "2026-07-04", "note": "⚠️ Handle only — verify full brand name", "interests": [], "value": "", "createdAt": "2026-06-27T00:00:00.000Z", "updatedAt": "2026-06-27T00:00:00.000Z", "email": "", "lineId": "@igloogel", "tel": ""}];
+
+let GAS_URL = 'https://script.google.com/macros/s/AKfycbySdCmepyTD7vob8xqcJyIojwkGUXB2U7emQ7ZFS1XQ4nGDR6QDqmcqKtMvaw084FBmZg/exec';
+const STAGES=[{id:'0',label:'New Lead',cls:'s0'},{id:'1',label:'Contacted',cls:'s1'},{id:'2',label:'Interested',cls:'s2'},{id:'3',label:'Proposal Sent',cls:'s3'},{id:'4',label:'Closed Won ✅',cls:'s4'},{id:'5',label:'Not Interested',cls:'s5'}];
+let leads=[],editingId=null,activeStage='all',saveTimer=null,gasMode=false;
+let scripts={},sopCards=[];
+
+// =================== DATE UTILS ===================
+function normDate(d){if(!d)return '';if(/^\d{4}-\d{2}-\d{2}$/.test(d))return d;try{const dt=new Date(d);if(isNaN(dt))return '';return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');}catch(e){return '';}}
+
+// =================== STATUS ===================
+function setStatus(msg){const el=document.getElementById('saveStatus');if(el)el.textContent=msg;}
+
+// =================== GAS ===================
+async function gasGet(action,extra={}){if(!GAS_URL)return null;try{const url=GAS_URL+'?action='+action+'&'+new URLSearchParams(extra);const r=await fetch(url);return await r.json();}catch(e){return null;}}
+async function gasPost(body){if(!GAS_URL)return null;try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(body)});return await r.json();}catch(e){return null;}}
+
+// =================== LOAD ===================
+async function loadData(){
+  setStatus('กำลังโหลด...');
+  if(GAS_URL){
+    const data=await gasGet('getAll');
+    if(data&&data.leads&&data.leads.length>0){
+      leads=data.leads.map(l=>({...l,followup:normDate(l.followup),firstContact:normDate(l.firstContact),lastInteraction:normDate(l.lastInteraction)}));
+      gasMode=true;setStatus('🟢 Online — Google Sheets');
+      await loadConfig();renderAll();return;
+    }
+    if(data&&data.leads&&data.leads.length===0){await seedToGAS();return;}
+  }
+  try{const raw=localStorage.getItem(STORAGE_KEY);leads=raw?JSON.parse(raw):SEED_LEADS.map(l=>({...l}));if(!raw)saveLocal();}
+  catch(e){leads=SEED_LEADS.map(l=>({...l}));}
+  setStatus(GAS_URL?'🔴 Offline — Local Storage':'💾 Local Storage');
+  loadConfigLocal();renderAll();
+}
+
+async function seedToGAS(){
+  setStatus('กำลัง Import leads...');
+  await gasPost({action:'seed',leads:SEED_LEADS});
+  await loadData();
+}
+
+async function loadConfig(){
+  // Load scripts
+  const sr=await gasGet('getConfig',{key:SCRIPTS_KEY});
+  if(sr&&sr.value)scripts=typeof sr.value==='string'?JSON.parse(sr.value):sr.value;
+  else scripts=getDefaultScripts();
+  // Load SOP order
+  const sopr=await gasGet('getConfig',{key:SOP_KEY});
+  if(sopr&&sopr.value)sopCards=typeof sopr.value==='string'?JSON.parse(sopr.value):sopr.value;
+  else sopCards=getDefaultSOP();
+}
+
+function loadConfigLocal(){
+  try{const sr=localStorage.getItem(SCRIPTS_KEY);scripts=sr?JSON.parse(sr):getDefaultScripts();}catch(e){scripts=getDefaultScripts();}
+  try{const sr=localStorage.getItem(SOP_KEY);sopCards=sr?JSON.parse(sr):getDefaultSOP();}catch(e){sopCards=getDefaultSOP();}
+}
+
+async function saveConfigToBackend(key,value){
+  if(gasMode){await gasPost({action:'saveConfig',key,value});}
+  localStorage.setItem(key,JSON.stringify(value));
+}
+
+// =================== LEADS CRUD ===================
+function saveLocal(){localStorage.setItem(STORAGE_KEY,JSON.stringify(leads));}
+function scheduleAutoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,800);}
+function isIncomplete(l){return !l.contact||l.contact.trim()==='';}
+
+async function saveLeadToBackend(lead){
+  if(gasMode){await gasPost({action:'save',lead});}else{saveLocal();}
+}
+async function deleteLeadFromBackend(id){
+  if(gasMode){await gasPost({action:'delete',id});}else{saveLocal();}
+}
+
+// =================== RENDER LEADS ===================
+function renderStats(){
+  const total=leads.length;const s=id=>leads.filter(l=>String(l.stage)===id).length;
+  const estab=leads.filter(l=>l.brandSize==='Established Brand').length;
+  const incomplete=leads.filter(isIncomplete).length;
+  document.getElementById('statsRow').innerHTML=`
+    <div class="stat-card total"><div class="num">${total}</div><div class="lbl">Total Leads</div></div>
+    <div class="stat-card s1"><div class="num">${s('1')}</div><div class="lbl">Contacted</div></div>
+    <div class="stat-card s2"><div class="num">${s('2')}</div><div class="lbl">Interested</div></div>
+    <div class="stat-card s3"><div class="num">${s('3')}</div><div class="lbl">Proposal Out</div></div>
+    <div class="stat-card s4"><div class="num">${s('4')}</div><div class="lbl">Closed Won</div></div>
+    <div class="stat-card estab"><div class="num">${estab}</div><div class="lbl">Established</div></div>
+    <div class="stat-card incomplete"><div class="num">${incomplete}</div><div class="lbl">⚠️ ไม่ครบ</div></div>`;
+}
+function renderPipeline(){
+  let html=`<div class="stage-pill all ${activeStage==='all'?'active':''}" onclick="setStage('all')">ทั้งหมด (${leads.length})</div>`;
+  STAGES.forEach(s=>{const c=leads.filter(l=>String(l.stage)===s.id).length;html+=`<div class="stage-pill ${s.cls} ${activeStage===s.id?'active':''}" onclick="setStage('${s.id}')">${s.label} (${c})</div>`;});
+  document.getElementById('pipelineHeader').innerHTML=html;
+}
+function setStage(v){activeStage=v;renderPipeline();renderTable();}
+function renderTable(){
+  const search=document.getElementById('searchBox').value.toLowerCase();
+  const fType=document.getElementById('filterType').value;
+  const fSize=document.getElementById('filterSize').value;
+  const fPri=document.getElementById('filterPriority').value;
+  const fInc=document.getElementById('filterIncomplete').value;
+  let filtered=leads.filter(l=>{
+    if(activeStage!=='all'&&String(l.stage)!==activeStage)return false;
+    if(search&&!(l.company||'').toLowerCase().includes(search)&&!(l.contact||'').toLowerCase().includes(search)&&!(l.email||'').toLowerCase().includes(search))return false;
+    if(fType&&l.type!==fType)return false;
+    if(fSize&&l.brandSize!==fSize)return false;
+    if(fPri&&l.priority!==fPri)return false;
+    if(fInc==='1'&&!isIncomplete(l))return false;
+    return true;
+  });
+  filtered.sort((a,b)=>{const po={High:0,Medium:1,Low:2};if((po[a.priority]||1)!==(po[b.priority]||1))return(po[a.priority]||1)-(po[b.priority]||1);return(a.followup||'z')>(b.followup||'z')?1:-1;});
+  const tbody=document.getElementById('leadsBody');
+  const empty=document.getElementById('emptyState');
+  if(!filtered.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  const today=new Date().toISOString().split('T')[0];
+  tbody.innerHTML=filtered.map((l,i)=>{
+    const stage=STAGES.find(s=>s.id===String(l.stage))||STAGES[0];
+    const priDot=l.priority==='High'?'p-high':l.priority==='Low'?'p-low':'p-med';
+    const fu=normDate(l.followup);
+    const isDue=fu&&fu<=today;
+    const fuTxt=fu?`<span class="${isDue?'followup-due':'followup-ok'}">${isDue?'🔴 ':''}${fu}</span>`:'<span style="color:var(--grey)">—</span>';
+    const notePrev=(l.note||'').length>38?l.note.substring(0,38)+'...':(l.note||'<span style="color:var(--grey)">—</span>');
+    const incFlag=isIncomplete(l)?'<span class="incomplete-flag">⚠️</span> ':'';
+    const sizeBadge=l.brandSize==='Established Brand'?'<span class="size-badge-estab">Estab.</span>':'<span class="size-badge-small">Small</span>';
+    const contactDetail=l.email||l.lineId||l.tel||'';
+    return `<tr onclick="openDetail('${l.id}')">
+      <td style="color:var(--mid);font-size:11px">${i+1}</td>
+      <td style="font-weight:600">${incFlag}${l.company||'—'}</td>
+      <td>${sizeBadge}</td>
+      <td><span class="type-badge">${(l.type||'—').replace(' / ',' /')}</span></td>
+      <td>${l.contact||'<span style="color:#E74C3C;font-size:11px">—</span>'}<br><span style="font-size:10px;color:var(--mid)">${l.position||''}</span></td>
+      <td style="font-size:11px;max-width:150px">
+        <div style="font-weight:500">${l.channel||'—'}</div>
+        <div style="font-size:10px;color:var(--mid);word-break:break-all">${contactDetail}</div>
+      </td>
+      <td><span class="badge badge-${stage.cls}">${stage.label}</span></td>
+      <td><span class="priority-dot ${priDot}"></span>${l.priority||'Med'}</td>
+      <td>${fuTxt}</td>
+      <td style="font-size:11px;color:var(--mid);max-width:130px">${notePrev}</td>
+      <td onclick="event.stopPropagation()">
+        <button class="btn btn-outline btn-sm" onclick="openModal('${l.id}')">✏️</button>
+        <button class="btn btn-sm btn-warn" style="margin-left:3px" onclick="deleteLead('${l.id}')">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// =================== LEAD MODAL ===================
+function openModal(id){
+  editingId=id||null;
+  const l=id?leads.find(x=>x.id===id):null;
+  document.getElementById('modalTitle').textContent=id?'แก้ไข Lead':'เพิ่ม Lead ใหม่';
+  document.getElementById('f-company').value=l?.company||'';
+  document.getElementById('f-type').value=l?.type||'';
+  document.getElementById('f-brandSize').value=l?.brandSize||'Small / Local Brand';
+  document.getElementById('f-website').value=l?.website||'';
+  document.getElementById('f-priority').value=l?.priority||'Medium';
+  document.getElementById('f-contact').value=l?.contact||'';
+  document.getElementById('f-position').value=l?.position||'';
+  document.getElementById('f-channel').value=l?.channel||'Line OA';
+  document.getElementById('f-email').value=l?.email||'';
+  document.getElementById('f-lineId').value=l?.lineId||'';
+  document.getElementById('f-tel').value=l?.tel||'';
+  document.getElementById('f-stage').value=l?.stage??'1';
+  document.getElementById('f-source').value=l?.source||'Brand Collab List';
+  document.getElementById('f-firstContact').value=normDate(l?.firstContact)||'';
+  document.getElementById('f-lastInteraction').value=normDate(l?.lastInteraction)||'';
+  document.getElementById('f-followup').value=normDate(l?.followup)||'';
+  document.getElementById('f-value').value=l?.value||'';
+  document.getElementById('f-note').value=l?.note||'';
+  checkIncomplete();
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function checkIncomplete(){const v=document.getElementById('f-contact').value.trim();document.getElementById('incompleteBanner').style.display=v?'none':'block';}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');editingId=null;}
+async function saveLead(){
+  const company=document.getElementById('f-company').value.trim();
+  if(!company){alert('กรุณากรอกชื่อแบรนด์');return;}
+  const btn=document.getElementById('saveLeadBtn');
+  btn.textContent='⏳...';btn.disabled=true;
+  const data={
+    company,type:document.getElementById('f-type').value,
+    brandSize:document.getElementById('f-brandSize').value,
+    website:document.getElementById('f-website').value,
+    priority:document.getElementById('f-priority').value,
+    contact:document.getElementById('f-contact').value,
+    position:document.getElementById('f-position').value,
+    channel:document.getElementById('f-channel').value,
+    email:document.getElementById('f-email').value,
+    lineId:document.getElementById('f-lineId').value,
+    tel:document.getElementById('f-tel').value,
+    stage:document.getElementById('f-stage').value,
+    source:document.getElementById('f-source').value,
+    firstContact:document.getElementById('f-firstContact').value,
+    lastInteraction:document.getElementById('f-lastInteraction').value,
+    followup:document.getElementById('f-followup').value,
+    value:document.getElementById('f-value').value,
+    note:document.getElementById('f-note').value,
+    interests:[],updatedAt:new Date().toISOString(),
+  };
+  if(editingId){const idx=leads.findIndex(l=>l.id===editingId);if(idx!==-1){data.id=editingId;data.createdAt=leads[idx].createdAt;leads[idx]=data;}}
+  else{data.id='lead_'+Date.now();data.createdAt=new Date().toISOString();leads.push(data);}
+  await saveLeadToBackend(data);
+  btn.textContent='💾 บันทึก';btn.disabled=false;
+  closeModal();renderAll();
+  setStatus(gasMode?'✓ บันทึกแล้ว → Google Sheets':'✓ บันทึกแล้ว (Local)');
+}
+async function deleteLead(id){
+  if(!confirm('ลบ Lead นี้?'))return;
+  leads=leads.filter(l=>l.id!==id);
+  await deleteLeadFromBackend(id);renderAll();
+}
+
+// =================== DETAIL ===================
+function openDetail(id){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const stage=STAGES.find(s=>s.id===String(l.stage))||STAGES[0];
+  document.getElementById('detailTitle').textContent=l.company;
+  document.getElementById('editFromDetailBtn').onclick=()=>{closeDetail();openModal(id);};
+  const valFmt=l.value?Number(l.value).toLocaleString('th-TH')+' ฿':'—';
+  const sizeBadge=l.brandSize==='Established Brand'?'<span class="size-badge-estab">Established Brand</span>':'<span class="size-badge-small">Small / Local Brand</span>';
+  document.getElementById('detailBody').innerHTML=`
+    <div class="detail-section"><h4>ข้อมูลแบรนด์</h4>
+      <div class="detail-row"><span class="key">แบรนด์</span><strong>${l.company}</strong></div>
+      <div class="detail-row"><span class="key">Brand Size</span>${sizeBadge}</div>
+      <div class="detail-row"><span class="key">ประเภท</span>${l.type||'—'}</div>
+      <div class="detail-row"><span class="key">Website</span>${l.website?`<a href="${l.website}" target="_blank">${l.website}</a>`:'—'}</div>
+      <div class="detail-row"><span class="key">Priority</span>${l.priority||'—'}</div>
+      <div class="detail-row"><span class="key">Source</span>${l.source||'—'}</div>
+    </div>
+    <div class="detail-section"><h4>ผู้ติดต่อ</h4>
+      ${isIncomplete(l)?'<div class="warn-banner" style="margin-bottom:8px;grid-column:unset">⚠️ ยังไม่มีชื่อผู้ติดต่อ — ใช้ Script Step 1 ก่อน</div>':''}
+      <div class="detail-row"><span class="key">ชื่อผู้ติดต่อ</span>${l.contact||'<span style="color:#E74C3C">ยังไม่ระบุ</span>'}</div>
+      <div class="detail-row"><span class="key">ตำแหน่ง</span>${l.position||'—'}</div>
+      <div class="detail-row"><span class="key">ช่องทาง</span>${l.channel||'—'}</div>
+      <div class="detail-row"><span class="key">Email</span>${l.email?`<a href="mailto:${l.email}">${l.email}</a>`:'—'}</div>
+      <div class="detail-row"><span class="key">Line</span>${l.lineId||'—'}</div>
+      <div class="detail-row"><span class="key">โทรศัพท์</span>${l.tel||'—'}</div>
+    </div>
+    <div class="detail-section"><h4>Pipeline</h4>
+      <div class="detail-row"><span class="key">Stage</span><span class="badge badge-${stage.cls}">${stage.label}</span></div>
+      <div class="detail-row"><span class="key">First Contact</span>${normDate(l.firstContact)||'—'}</div>
+      <div class="detail-row"><span class="key">Last Interaction</span>${normDate(l.lastInteraction)||'—'}</div>
+      <div class="detail-row"><span class="key">Follow Up</span>${normDate(l.followup)||'—'}</div>
+      <div class="detail-row"><span class="key">Proposal Value</span>${valFmt}</div>
+    </div>
+    ${l.note?`<div class="detail-section"><h4>Notes</h4><div style="font-size:12px;line-height:1.7;white-space:pre-wrap;background:#FAFAFA;padding:10px;border-radius:8px;border:1px solid var(--border)">${l.note}</div></div>`:''}
+    <div style="font-size:10px;color:var(--mid);margin-top:6px">สร้าง: ${l.createdAt?new Date(l.createdAt).toLocaleString('th-TH'):'—'} · แก้ไข: ${l.updatedAt?new Date(l.updatedAt).toLocaleString('th-TH'):'—'}</div>`;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('open');}
+
+// =================== TABS ===================
+function showTab(name){
+  ['leads','scripts','sop'].forEach(t=>document.getElementById('tab-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['leads','scripts','sop'][i]===name));
+  if(name==='scripts')renderScripts();
+  if(name==='sop')renderSOP();
+}
+
+// =================== SCRIPTS ===================
+function getDefaultScripts(){
+  return {
+    step1:{
+      title:'📱 Step 1 — หาผู้ติดต่อที่ถูกต้อง (ทุก Lead)',
+      tag:'Stage 1 → ก่อนส่ง Pitch · ใช้กับทุกแบรนด์',
+      variants:[
+        {label:'Small / Local Brand — Line OA (ทั่วไป)',tier:'b',
+         text:'สวัสดีค่ะ ทีม[ชื่อแบรนด์] 🙏\n\nดิฉัน[ชื่อเจ้าหน้าที่] จาก The Catering Table (TCT) นะคะ\nรบกวนขอทราบว่า ทางแบรนด์มีใครดูแลเรื่อง\nการจัดงาน Event / ของขวัญองค์กร / Collaboration ได้บ้างคะ?\n\nอยากส่งข้อมูลบริการให้ดูเบื้องต้นค่ะ 🎂'},
+        {label:'Established Brand — Email (ทางการ)',tier:'a',
+         text:'เรียน ทีมงาน[ชื่อแบรนด์]\n\nดิฉัน[ชื่อเจ้าหน้าที่] จาก The Catering Table (TCT) ค่ะ\nTCT เป็นผู้ให้บริการเค้กคุณภาพพรีเมียมและ Catering สำหรับองค์กรค่ะ\n\nรบกวนสอบถามว่า ทางบริษัทมีฝ่ายที่ดูแลเรื่อง\nCorporate Gift / การจัดเลี้ยง Event หรือของขวัญพนักงานไหมคะ?\n\nขอรบกวนให้ช่วย Forward email นี้ไปยังผู้ดูแลด้วยได้เลยนะคะ 🙏\n\nขอบคุณมากค่ะ\n[ชื่อเจ้าหน้าที่] | The Catering Table\nLine OA: @thecateringtable'}
+      ]},
+    step2:{
+      title:'🎯 Step 2 — ส่ง Pitch + Catalog',
+      tag:'Stage 1 → 2 · หลังได้ผู้ติดต่อแล้ว',
+      variants:[
+        {label:'Small / Local Brand — Line',tier:'b',
+         text:'สวัสดีค่ะ คุณ[ชื่อ] 🙏\n\nขอบคุณที่ส่งต่อให้นะคะ ดิฉัน[ชื่อเจ้าหน้าที่] จาก TCT ค่ะ\n\nTCT เป็นบริการเค้กและ Catering สำหรับองค์กรค่ะ ไม่ว่าจะเป็น\n🎂 เค้กวันเกิดพนักงาน / ของขวัญให้ลูกค้า\n🍽️ Catering งาน Event / ประชุม\n🎨 เค้กโลโก้แบรนด์ / Branded Dessert\n\nขอส่ง Catalog ให้ดูก่อนได้เลยนะคะ [LINK]\nถ้าสนใจตัวไหนเป็นพิเศษ ยินดีให้ข้อมูลเพิ่มเติมค่ะ 😊'},
+        {label:'Established Brand — Email',tier:'a',
+         text:'เรียน คุณ[ชื่อ]\n\nขอบคุณที่สละเวลาค่ะ ดิฉัน[ชื่อเจ้าหน้าที่] จาก The Catering Table (TCT) ค่ะ\n\nTCT ให้บริการเค้กพรีเมียมและ Catering สำหรับองค์กร ครอบคลุมบริการดังนี้ค่ะ\n• เค้กและของหวาน Corporate Gift สำหรับลูกค้าและพนักงาน\n• Branded Cake / เค้กโลโก้บริษัทสำหรับงาน Event\n• Catering ขนมหวานสำหรับงานประชุม, Seminar, Annual Dinner\n\nขอแนบ Product Catalog เพื่อให้พิจารณาเบื้องต้นค่ะ [LINK]\n\nหากมีงานที่กำลังวางแผน ยินดี Consult และจัดทำ Proposal ให้ฟรีนะคะ\nติดต่อกลับได้ทาง Email นี้หรือ Line OA: @thecateringtable ค่ะ\n\nด้วยความนับถือ\n[ชื่อเจ้าหน้าที่] | The Catering Table'}
+      ]},
+    step3:{
+      title:'🔄 Step 3 — Follow Up (3-5 วันหลังส่ง Catalog)',
+      tag:'Stage 2 · ถ้ายังไม่ตอบ',
+      variants:[
+        {label:'ทุกประเภท',tier:'b',
+         text:'สวัสดีค่ะ คุณ[ชื่อ] 🙏\n\nติดตามมาสอบถามเรื่อง Catalog ที่ส่งไปเมื่อวันก่อนนะคะ\nได้มีโอกาสดูแล้วเป็นอย่างไรบ้างคะ?\n\nถ้ามีสินค้าหรือบริการตัวไหนน่าสนใจ\nยินดีให้ข้อมูลเพิ่มเติมหรือจัดทำ Proposal ให้ได้เลยค่ะ 😊\n\nมีงาน Event หรือวาระพิเศษที่กำลังวางแผนอยู่ไหมคะ?'}
+      ]},
+    step4:{
+      title:'❓ Step 4 — Qualify (เมื่อ Lead ตอบกลับ)',
+      tag:'Stage 2 → 3 · เก็บข้อมูลก่อนทำ Proposal',
+      variants:[
+        {label:'ทุกประเภท',tier:'b',
+         text:'ดีใจมากเลยค่ะที่สนใจ! 🎉\n\nขอถามข้อมูลเพิ่มเติมสักนิดนะคะ เพื่อให้ TCT เตรียม Proposal ที่เหมาะที่สุดให้คะ\n\n1. มีงาน Event หรือวาระพิเศษที่กำลังวางแผนอยู่ไหมคะ?\n2. ของขวัญหรือขนมที่ต้องการ มีจำนวนคร่าวๆ กี่ชิ้น/คนคะ?\n3. งบประมาณต่อ Order โดยประมาณอยู่ที่เท่าไหร่คะ?\n4. มีไอเดียหรือ Theme ที่ต้องการหรือเปล่าคะ?\n\nTCT มีตัวอย่างผลงาน Corporate ให้ดูเพิ่มเติมได้ด้วยนะคะ 😊'}
+      ]},
+    step5:{
+      title:'✅ Step 5 — Confirm Order',
+      tag:'Stage 3 → 4 · ปิดดีล',
+      variants:[
+        {label:'ทุกประเภท',tier:'b',
+         text:'สวัสดีค่ะ คุณ[ชื่อ] 🙏\n\nขอ Confirm รายละเอียด Order อีกครั้งนะคะ\n\n✅ สินค้า: [รายการ]\n✅ จำนวน: [จำนวน] ชิ้น\n✅ วันส่งมอบ: [วันที่]\n✅ ราคารวม: [ราคา] บาท\n✅ ที่อยู่จัดส่ง: [ที่อยู่]\n\nถ้าถูกต้องครบถ้วน รบกวน Confirm กลับมาได้เลยนะคะ\nTCT จะเริ่มดำเนินการทันทีหลังได้รับการยืนยันค่ะ 🎂'}
+      ]},
+    kit:{
+      title:'🌱 Keep in Touch (ส่งทุก 1-2 เดือน)',
+      tag:'ทุก Stage · สำหรับ Lead ที่ยังไม่พร้อม',
+      variants:[
+        {label:'ทุกประเภท',tier:'b',
+         text:'สวัสดีค่ะ คุณ[ชื่อ] / ทีม[ชื่อแบรนด์] 🙏\n\nTCT มีเมนูใหม่ / Promotion พิเศษสำหรับองค์กรในเดือนนี้ค่ะ 🎉\n[รายละเอียด Promotion]\n\nถ้ามีงาน Event หรือวาระพิเศษที่กำลังวางแผน\nTCT ยินดีช่วย Consult และเตรียมให้นะคะ 😊'}
+      ]}
+  };
+}
+
+function renderScripts(){
+  const container=document.getElementById('scriptsContainer');
+  if(!container)return;
+  const keys=Object.keys(scripts);
+  container.innerHTML=keys.map(key=>{
+    const s=scripts[key];
+    const variantsHtml=s.variants.map((v,vi)=>`
+      <div class="script-sub-label"><span class="tier-label tier-${v.tier}">${v.tier==='a'?'Established Brand':'Small / Local Brand'}</span> — ${v.label}</div>
+      <div class="script-view" id="sv-${key}-${vi}">${v.text}</div>
+      <textarea class="script-edit" id="se-${key}-${vi}">${v.text}</textarea>
+      <div class="script-actions">
+        <button class="copy-btn" onclick="copyScriptText('sv-${key}-${vi}',this)">📋 Copy</button>
+        <span class="copy-ok">✓ Copied!</span>
+        <button class="edit-script-btn" id="eb-${key}-${vi}" onclick="toggleScriptEdit('${key}',${vi})">✏️ แก้ไข</button>
+        <button class="save-script-btn" id="sb-${key}-${vi}" onclick="saveScript('${key}',${vi})">💾 บันทึก</button>
+        <button class="cancel-script-btn" id="cb-${key}-${vi}" onclick="cancelScriptEdit('${key}',${vi})">ยกเลิก</button>
+      </div>`).join('');
+    return `<div class="script-section">
+      <div class="script-header" onclick="toggleScriptSection(this)">
+        <div class="script-header-left"><h3>${s.title}</h3><div class="script-tag">${s.tag}</div></div>
+        <div class="script-header-right"><span style="font-size:14px;color:var(--mid)">▼</span></div>
+      </div>
+      <div class="script-body ${key==='step1'?'open':''}">${variantsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleScriptSection(header){
+  const body=header.nextElementSibling;
+  const arrow=header.querySelector('.script-header-right span');
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  if(arrow)arrow.textContent=open?'▶':'▼';
+}
+
+function copyScriptText(id,btn){
+  const el=document.getElementById(id);if(!el)return;
+  navigator.clipboard.writeText(el.textContent||el.value).then(()=>{
+    const s=btn.nextElementSibling;if(s){s.style.display='inline';setTimeout(()=>s.style.display='none',2000);}
+  });
+}
+
+function toggleScriptEdit(key,vi){
+  const view=document.getElementById(`sv-${key}-${vi}`);
+  const edit=document.getElementById(`se-${key}-${vi}`);
+  const editBtn=document.getElementById(`eb-${key}-${vi}`);
+  const saveBtn=document.getElementById(`sb-${key}-${vi}`);
+  const cancelBtn=document.getElementById(`cb-${key}-${vi}`);
+  edit.value=view.textContent;
+  view.style.display='none';edit.style.display='block';
+  editBtn.style.display='none';saveBtn.style.display='inline-block';cancelBtn.style.display='inline-block';
+}
+
+function cancelScriptEdit(key,vi){
+  const view=document.getElementById(`sv-${key}-${vi}`);
+  const edit=document.getElementById(`se-${key}-${vi}`);
+  const editBtn=document.getElementById(`eb-${key}-${vi}`);
+  const saveBtn=document.getElementById(`sb-${key}-${vi}`);
+  const cancelBtn=document.getElementById(`cb-${key}-${vi}`);
+  view.style.display='block';edit.style.display='none';
+  editBtn.style.display='inline-block';saveBtn.style.display='none';cancelBtn.style.display='none';
+}
+
+async function saveScript(key,vi){
+  const edit=document.getElementById(`se-${key}-${vi}`);
+  const view=document.getElementById(`sv-${key}-${vi}`);
+  const saveBtn=document.getElementById(`sb-${key}-${vi}`);
+  const newText=edit.value;
+  scripts[key].variants[vi].text=newText;
+  view.textContent=newText;
+  saveBtn.textContent='⏳...';saveBtn.disabled=true;
+  await saveConfigToBackend(SCRIPTS_KEY,scripts);
+  saveBtn.textContent='💾 บันทึก';saveBtn.disabled=false;
+  cancelScriptEdit(key,vi);
+  setStatus(gasMode?'✓ Script บันทึกแล้ว → Google Sheets':'✓ Script บันทึกแล้ว (Local)');
+}
+
+// =================== SOP ===================
+function getDefaultSOP(){
+  return [
+    {id:'s1',color:'var(--blue)',num:'1',title:'Stage 1 — Contacted · หาผู้ติดต่อที่ถูกต้อง',goal:'เป้าหมาย: รู้ชื่อและช่องทางของคนที่ถูกต้องก่อนส่ง Pitch',
+     steps:['Filter Leads ที่มี ⚠️ ไม่มีผู้ติดต่อ — ทำก่อน <span class="tool-tag">Tracker</span>','ดู Brand Size: <strong>Established</strong> → ส่ง Email ทางการ / <strong>Small</strong> → ทัก Line OA <span class="tool-tag">Scripts Tab</span>','ใช้ Script "Step 1 — หาผู้ติดต่อ" ตามประเภท Brand Size','เมื่อได้ชื่อผู้ติดต่อ → อัปเดตใน Tracker ทันที + ตั้ง Follow Up = วันถัดไป','บันทึก Note: วันที่ทัก + ช่องทาง + ชื่อที่ได้รับ']},
+    {id:'s2',color:'var(--amber)',num:'2',title:'Stage 2 — Interested · ส่ง Pitch + Catalog',goal:'เป้าหมาย: ส่ง Catalog และเปิดบทสนทนาเรื่อง Corporate',
+     steps:['ใช้ Script "Step 2 — ส่ง Pitch" พร้อมแนบ Catalog link <span class="tool-tag">Google Drive</span>','ตั้ง Follow Up = 3-5 วันหลังส่ง','ถ้าไม่มีการตอบกลับใน 5 วัน → ใช้ Script "Step 3 — Follow Up"','บันทึก Note: วันที่ส่ง + ช่องทาง']},
+    {id:'s3',color:'var(--purple)',num:'3',title:'Stage 3 — Qualify · เมื่อ Lead ตอบกลับ',goal:'เป้าหมาย: เก็บข้อมูลครบก่อนส่ง Proposal',
+     steps:['ใช้ Script "Step 4 — Qualify" ถามคำถาม 4 ข้อ','บันทึกคำตอบทั้งหมดใน Note ของ Lead','ถ้า High Value หรือ Established Brand → แจ้ง Bow ทำ Custom Proposal <span class="bow-tag">แจ้ง Bow</span>','ตั้ง Follow Up = 2-3 วันหลังได้คำตอบ']},
+    {id:'s4',color:'#8B4513',num:'P',title:'Stage 3 → 4 — Proposal Sent',goal:'เป้าหมาย: ส่ง Proposal และติดตามผล',
+     steps:['Bow หรือเจ้าหน้าที่อาวุโสจัดทำ Proposal / Quotation <span class="bow-tag">Bow ทำ</span>','ระบุ Valid Until Date = 14 วัน','บันทึกมูลค่า Proposal ใน Tracker','Follow Up หลัง 3-5 วัน ถ้ายังไม่มีการตอบกลับ']},
+    {id:'s5',color:'var(--green)',num:'✓',title:'Stage 4 — Closed Won',goal:'เป้าหมาย: Confirm Order + สร้าง Long-term Relationship',
+     steps:['ใช้ Script "Step 5 — Confirm Order" ยืนยันรายละเอียด','ส่งข้อมูลให้ทีม Production ดำเนินการ','หลังส่งมอบ: ขอ Feedback / Review','ตั้ง Reminder Keep in Touch ทุก 1-2 เดือน <span class="tool-tag">Tracker</span>']},
+    {id:'s6',color:'#C0392B',num:'✕',title:'Stage 5 — Not Interested / On Hold',goal:'เป้าหมาย: เก็บไว้ในระบบ + Re-engage ภายหลัง',
+     steps:['บันทึกเหตุผลใน Note','ถ้า "ยังไม่พร้อม" → ตั้ง Re-engage ใน 1-3 เดือน','ส่ง Keep in Touch Script ทุก 1-2 เดือน <span class="tool-tag">Scripts Tab</span>']}
+  ];
+}
+
+let dragSrcIdx=null;
+
+function renderSOP(){
+  const list=document.getElementById('sopList');if(!list)return;
+  list.innerHTML=sopCards.map((card,idx)=>`
+    <li class="sop-card" draggable="true" data-idx="${idx}"
+      ondragstart="sopDragStart(event,${idx})"
+      ondragover="sopDragOver(event,${idx})"
+      ondragleave="sopDragLeave(event)"
+      ondrop="sopDrop(event,${idx})"
+      ondragend="sopDragEnd(event)">
+      <div class="sop-card-header">
+        <span class="drag-handle" title="ลากเพื่อเรียงลำดับ">⠿</span>
+        <div class="stage-num" style="background:${card.color}">${card.num}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px">${card.title}</div>
+          <div style="font-size:11px;color:var(--mid)">${card.goal}</div>
+        </div>
+        <button class="edit-script-btn" onclick="toggleSOPEdit(${idx},event)">✏️ แก้ไข</button>
+      </div>
+      <div class="sop-card-body">
+        <div id="sop-view-${idx}">
+          <ul class="sop-steps">${card.steps.map(s=>`<li>${s}</li>`).join('')}</ul>
+        </div>
+        <textarea class="sop-edit-area" id="sop-edit-${idx}">${card.steps.join('\n')}</textarea>
+        <div class="sop-edit-actions" id="sop-actions-${idx}" style="display:flex">
+          <button class="save-script-btn" style="display:none" id="sop-save-${idx}" onclick="saveSOPCard(${idx})">💾 บันทึก</button>
+          <button class="cancel-script-btn" style="display:none" id="sop-cancel-${idx}" onclick="cancelSOPEdit(${idx})">ยกเลิก</button>
+        </div>
+      </div>
+    </li>`).join('');
+}
+
+function toggleSOPEdit(idx,e){
+  e.stopPropagation();
+  const view=document.getElementById(`sop-view-${idx}`);
+  const edit=document.getElementById(`sop-edit-${idx}`);
+  const saveBtn=document.getElementById(`sop-save-${idx}`);
+  const cancelBtn=document.getElementById(`sop-cancel-${idx}`);
+  edit.value=sopCards[idx].steps.join('\n');
+  view.style.display='none';edit.style.display='block';
+  saveBtn.style.display='inline-block';cancelBtn.style.display='inline-block';
+}
+
+function cancelSOPEdit(idx){
+  const view=document.getElementById(`sop-view-${idx}`);
+  const edit=document.getElementById(`sop-edit-${idx}`);
+  const saveBtn=document.getElementById(`sop-save-${idx}`);
+  const cancelBtn=document.getElementById(`sop-cancel-${idx}`);
+  view.style.display='block';edit.style.display='none';
+  saveBtn.style.display='none';cancelBtn.style.display='none';
+}
+
+async function saveSOPCard(idx){
+  const edit=document.getElementById(`sop-edit-${idx}`);
+  const saveBtn=document.getElementById(`sop-save-${idx}`);
+  const newSteps=edit.value.split('\n').map(s=>s.trim()).filter(s=>s);
+  sopCards[idx].steps=newSteps;
+  saveBtn.textContent='⏳...';saveBtn.disabled=true;
+  await saveConfigToBackend(SOP_KEY,sopCards);
+  saveBtn.textContent='💾 บันทึก';saveBtn.disabled=false;
+  const statusEl=document.getElementById('sopSaveStatus');
+  if(statusEl){statusEl.style.display='block';setTimeout(()=>statusEl.style.display='none',2000);}
+  cancelSOPEdit(idx);renderSOP();
+}
+
+// Drag and drop SOP
+function sopDragStart(e,idx){dragSrcIdx=idx;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function sopDragOver(e,idx){e.preventDefault();e.dataTransfer.dropEffect='move';if(idx!==dragSrcIdx)e.currentTarget.classList.add('drag-over');}
+function sopDragLeave(e){e.currentTarget.classList.remove('drag-over');}
+async function sopDrop(e,idx){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(dragSrcIdx===null||dragSrcIdx===idx)return;
+  const moved=sopCards.splice(dragSrcIdx,1)[0];
+  sopCards.splice(idx,0,moved);
+  dragSrcIdx=null;renderSOP();
+  await saveConfigToBackend(SOP_KEY,sopCards);
+  const statusEl=document.getElementById('sopSaveStatus');
+  if(statusEl){statusEl.style.display='block';setTimeout(()=>statusEl.style.display='none',2000);}
+}
+function sopDragEnd(e){e.currentTarget.classList.remove('dragging');dragSrcIdx=null;document.querySelectorAll('.sop-card').forEach(c=>c.classList.remove('drag-over'));}
+
+// =================== EXPORT ===================
+function exportCSV(){
+  const headers=['แบรนด์','Brand Size','ประเภท','ผู้ติดต่อ','ตำแหน่ง','ช่องทาง','Email','Line ID','โทรศัพท์','Website','Stage','Priority','Source','First Contact','Last Interaction','Follow Up','Proposal Value','Notes'];
+  const rows=leads.map(l=>[l.company,l.brandSize,l.type,l.contact,l.position,l.channel,l.email,l.lineId,l.tel,l.website,STAGES.find(s=>s.id===String(l.stage))?.label,l.priority,l.source,normDate(l.firstContact),normDate(l.lastInteraction),normDate(l.followup),l.value,l.note].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='TCT_Leads_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+}
+
+// =================== INIT ===================
+function renderAll(){renderStats();renderPipeline();renderTable();}
+document.addEventListener('input',e=>{if(e.target.closest('#modalOverlay'))scheduleAutoSave();});
+loadData();
+setInterval(()=>{if(!gasMode)saveLocal();},60000);
+</script>
+</body>
+</html>
